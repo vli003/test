@@ -55,7 +55,6 @@ public class GifsFragment extends Fragment {
     private MyAdapter myAdapter;
     private Timer timer;
     private final long DELAY = 200;
-    private int page = 0;
     private int limit = 20;
     private String keyDemo = "dc6zaTOxFJmzC";
     private String key = "dvVxO5Yhd3nlfzSzNDbzvo1GZIQsSRLu";
@@ -63,7 +62,6 @@ public class GifsFragment extends Fragment {
     private MyWorkerThread myWorkerThread;
 
     private MyViewModel model;
-
 
     public GifsFragment() {
         // Required empty public constructor
@@ -86,34 +84,16 @@ public class GifsFragment extends Fragment {
 
 
         model = ViewModelProviders.of(this).get(MyViewModel.class);
-        model.datumList.observe(getActivity(), datumList -> {
-            myAdapter.submitList(datumList, page);
-//            Datum datum1 = datumList.get(position);
-//            TextView textView = holder.textView;
-//            textView.setText(datum1.getTitle());
-//
-//            Size fixedHeightDownsampled1 = datum1.getImages().getFixedHeightDownsampled();
-//            ImageView imageView = holder.imageView;
-//            Glide.with(holder.imageView.getContext()).load(fixedHeightDownsampled1.getUrl()).into(imageView);
+        model.datumList.observe(this, datumList -> {
+            myAdapter.submitList(datumList);
         });
 
-
-        Log.e("TEST ", "onCreateView end");
-
-//*************************************************************
         myWorkerThread = new MyWorkerThread("myWorkerThread");
-        Runnable task = new Runnable() {
-
-            @Override
-            public void run() {
-                request(page);
-            }
-        };
+        /* Runnable task = () -> model.request(etGifType.getText().toString(), key, limit,true);
         myWorkerThread.start();
         myWorkerThread.prepareHandler();
-        myWorkerThread.postTask(task);
+        myWorkerThread.postTask(task);*/
 
-//*************************************************************
         etGifType.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -132,83 +112,23 @@ public class GifsFragment extends Fragment {
             public void afterTextChanged(Editable s) {
 
                 if (s.length() >= 2) {
-//                    setPage(0);
-                    page = 0;
+                    model.setPage(false);
+
                     timer = new Timer();
                     timer.schedule(new TimerTask() {
                         @Override
                         public void run() {
-                            request(page);
+//                            request(page);
+
+                            model.request(s.toString(), key, limit, true);
                         }
                     }, DELAY);
                 }
             }
         });
-
-//        handler = new MyHandler(this, myAdapter, page, thread);
-
         return v;
     }
 
-    //*************************************************************
-    public void request(final int page) {
-        if (!etGifType.getText().toString().equals("") & etGifType.getText().length() >= 2) {
-
-
-//            loadMore("https://api.giphy.com/v1/gifs/search?q=" + etGifType.getText().toString() + "&api_key=" + key + "&limit=" + limit + "&offset=" + page * limit, getContext());
-
-            Request request = new Request.Builder()
-                    .url(httpUrl(page))
-                    .build();
-            sendRequest(request);
-        }
-    }
-
-    public HttpUrl httpUrl(int page) {
-
-        HttpUrl httpUrl = new HttpUrl.Builder()
-                .scheme("https")
-                .host("api.giphy.com")
-                .addPathSegment("v1")
-                .addPathSegment("gifs")
-                .addPathSegment("search")
-                .addQueryParameter("q", etGifType.getText().toString())
-                .addQueryParameter("api_key", key)
-                .addQueryParameter("limit", String.valueOf(limit))
-                .addQueryParameter("offset", String.valueOf(page * limit))
-                .build();
-        return httpUrl;
-    }
-
-    public void sendRequest(Request request) {
-        OkHttpClient client = new OkHttpClient();
-        try {
-            final Response response = client.newCall(request).execute();
-
-            Log.e("TEST ", "page " + page + " " + response.toString());
-
-
-            Handler mainHandler = new Handler(Looper.getMainLooper());
-            mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    MyResponse myResponse = null;
-                    try {
-                        myResponse = new Gson().fromJson(response.body().string(), MyResponse.class);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    myAdapter.submitList(myResponse.getData(), page);//update recycle view*/
-                    model.datumList.setValue(myResponse.getData());
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-
-        }
-    }
-
-    //*************************************************************
     class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         private List<Datum> gifs = new ArrayList<>();
@@ -227,29 +147,18 @@ public class GifsFragment extends Fragment {
             }
         }
 
-        public void submitList(List<Datum> list, int page) {
+        public void submitList(List<Datum> list) {
 
-            if (page == 0) {
-                gifs = list;
-            } else gifs.addAll(list);
-            notifyDataSetChanged();
+//            if (page == 0) {
+            gifs = list;
+//            } else gifs.addAll(list);
+            notifyDataSetChanged();//update recycler view
         }
-
-/*        public void supplementList(List<Datum> list) {
-            gifs.addAll(list);
-            notifyDataSetChanged();
-        }*/
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-/*            Context context = parent.getContext();
-            LayoutInflater inflater = LayoutInflater.from(context);
-            View v = inflater.inflate(R.layout.item_gif, parent, false);*/
 
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gif, parent, false);
-
-//        ImageView v = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gif, parent, false);
-
             return new ViewHolder(v);
         }
 
@@ -258,27 +167,18 @@ public class GifsFragment extends Fragment {
 
             if (position == gifs.size() - 1) {
                 backgroundThreadToast(getContext(), "position " + position);
-                page += 1;
-
-                //check thread(isAlive)
+                model.setPage(true);
 
                 if (myWorkerThread.isAlive()) myWorkerThread.interrupt();
 
                 myWorkerThread = new MyWorkerThread("myWorkerThread");
-                Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        request(page);
-                    }
-                };
+                Runnable task = () -> model.request(etGifType.getText().toString(), key, limit, false);
                 myWorkerThread.start();
                 myWorkerThread.prepareHandler();
                 myWorkerThread.postTask(task);
-
-//                request(page);
             }
 
-//            fillItemGif(holder, position);
+            fillItemGif(holder, position);
             Log.e("TEST", /*"URL " + original.getUrl() + */"position " + position);
         }
 
@@ -291,32 +191,22 @@ public class GifsFragment extends Fragment {
         }
 
         public void fillItemGif(ViewHolder holder, final int position) {
-/*            Datum datum = gifs.get(position);
+            Datum datum = gifs.get(position);
             TextView tv = holder.textView;
             tv.setText(datum.getTitle());
 
             Size fixedHeightDownsampled = datum.getImages().getFixedHeightDownsampled();
             ImageView iv = holder.imageView;
-            Glide.with(holder.itemView.getContext()).load(fixedHeightDownsampled.getUrl()).into(iv);*/
-
-//§§§§§§§§§§§§§§§§§§§§§§§§§§§
-
+            Glide.with(holder.itemView.getContext()).load(fixedHeightDownsampled.getUrl()).into(iv);
         }
     }
 
     public static void backgroundThreadToast(final Context context, final String msg) {
         if (context != null && msg != null) {
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-
-                @Override
-                public void run() {
-                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-                }
-            });
+            new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
         }
     }
 
-    //******************************************************
     public class MyWorkerThread extends HandlerThread {
 
         private Handler myWorkerHandler;
@@ -333,16 +223,4 @@ public class GifsFragment extends Fragment {
             myWorkerHandler = new Handler(getLooper());
         }
     }
-
-    //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
-/*    public class MyViewModel extends ViewModel {
-
-        private MutableLiveData<List<Datum>> datumList;
-
-
-        public MyViewModel(Application application) {
-//            super(application);
-            datumList = new MutableLiveData<>();
-        }
-    }*/
 }
