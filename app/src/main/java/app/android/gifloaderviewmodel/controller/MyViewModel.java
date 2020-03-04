@@ -22,34 +22,75 @@ import okhttp3.Response;
 public class MyViewModel extends ViewModel {
 
     public MutableLiveData<List<Datum>> datumList;
+    private String keyDemo = "dc6zaTOxFJmzC";
+    private String key = "dvVxO5Yhd3nlfzSzNDbzvo1GZIQsSRLu";
+    private int limit = 20;
     private int page = 0;
     private String lastGifType;
-
+    private MyWorkerThread myWorkerThread;
 
     public MyViewModel() {
 
         datumList = new MutableLiveData<>();
     }
 
-    public void request(String gifType, String key, int limit, boolean isChange) {
+    public void updatePage(String gifType) {
 
-        if (!gifType.equalsIgnoreCase(lastGifType) || !isChange) {
+        page += 1;
+        request(gifType, new OnDataLoaded() {
+            @Override
+            public void onDataLoaded(MyResponse response) {
+
+                List<Datum> oldDatum = datumList.getValue();
+                if (oldDatum != null) {
+                    oldDatum.addAll(response.getData());
+                }
+                datumList.postValue(oldDatum);
+            }
+        });
+    }
+
+    public void getGifs(String gifType) {
+
+        if (gifType.equalsIgnoreCase(lastGifType)) {
+            return;
+        }
+        page = 0;
+        request(gifType, new OnDataLoaded() {
+            @Override
+            public void onDataLoaded(MyResponse response) {
+
+                datumList.postValue(response.getData());
+            }
+        });
+    }
+
+    private void request(String gifType, OnDataLoaded onDataLoaded) {
+
+        Runnable task = () -> {
+//            request(gifType, onDataLoaded);
 
             lastGifType = gifType;
 
             if (!gifType.equals("") & gifType.length() >= 2) {
 
                 Request request = new Request.Builder()
-                        .url(httpUrl(gifType, key, limit))
+                        .url(httpUrl(gifType))
                         .build();
-                sendRequest(request, page, isChange);
+                sendRequest(request, onDataLoaded);
             }
-        }
+        };
+
+        interruptThread(myWorkerThread);
+        myWorkerThread = new MyWorkerThread("myWorkerThread");
+        myWorkerThread.start();
+        myWorkerThread.prepareHandler();
+        myWorkerThread.postTask(task);
     }
 
-    public HttpUrl httpUrl(String gifType, String key, int limit) {
+    public HttpUrl httpUrl(String gifType) {
 
-        HttpUrl httpUrl = new HttpUrl.Builder()
+        return new HttpUrl.Builder()
                 .scheme("https")
                 .host("api.giphy.com")
                 .addPathSegment("v1")
@@ -60,10 +101,9 @@ public class MyViewModel extends ViewModel {
                 .addQueryParameter("limit", String.valueOf(limit))
                 .addQueryParameter("offset", String.valueOf(page * limit))
                 .build();
-        return httpUrl;
     }
 
-    public void sendRequest(Request request, int page, boolean isChange) {
+    public void sendRequest(Request request, OnDataLoaded onDataLoaded) {
         OkHttpClient client = new OkHttpClient();
         try {
             final Response response = client.newCall(request).execute();
@@ -78,29 +118,17 @@ public class MyViewModel extends ViewModel {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-                List<Datum> oldDatum = datumList.getValue();
-                if (myResponse == null) {
-                    return;
-                }
-
-                if (oldDatum == null || isChange) {
-                    datumList.postValue(myResponse.getData());
-
-                } else {
-                    oldDatum.addAll(myResponse.getData());
-                    datumList.postValue(oldDatum);
-                }
+                onDataLoaded.onDataLoaded(myResponse);
             });
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void setPage(boolean isIncrement) {
-        if (isIncrement) {
-            page += 1;
-        } else page = 0;
+    public void interruptThread(Thread thread) {
+        if (thread != null) {
+            if (thread.isAlive()) thread.interrupt();
+        }
     }
 }
 
