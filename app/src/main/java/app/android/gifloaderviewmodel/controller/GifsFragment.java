@@ -57,7 +57,7 @@ public class GifsFragment extends Fragment {
         myAdapter = new MyAdapter(new OnUpdatePage() {
             @Override
             public void updatePage() {
-                Toast.makeText(getContext(), "load new page", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "loaded new page", Toast.LENGTH_SHORT).show();
                 myViewModel.updatePage(etGifType.getText().toString());
             }
         });
