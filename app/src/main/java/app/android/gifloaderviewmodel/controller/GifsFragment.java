@@ -31,7 +31,6 @@ public class GifsFragment extends Fragment {
     private MyAdapter myAdapter;
     private Timer timer;
     private final long DELAY = 200;
-
     private MyViewModel myViewModel;
 
     public GifsFragment() {
