@@ -1,8 +1,5 @@
 package app.android.gifloaderviewmodel.controller;
 
-import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,13 +41,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public void onBindViewHolder(@NotNull ViewHolder holder, int position) {
 
         if (position == gifs.size() - 1) {
-//           backgroundThreadToast(, "position " + position);
-
             onUpdatePage.updatePage();
         }
-
         holder.bind(gifs.get(position));
-//        fillItemGif(holder, position);
         Log.e("TEST", "position " + position);
     }
 
@@ -74,7 +67,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         }
     }*/
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView textView;
         ImageView imageView;

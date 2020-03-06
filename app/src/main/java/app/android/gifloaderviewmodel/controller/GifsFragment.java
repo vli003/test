@@ -46,8 +46,6 @@ public class GifsFragment extends Fragment {
         etGifType = v.findViewById(R.id.et_gif_type);
         recyclerView = v.findViewById(R.id.rv);
 
-//        recyclerView.setHasFixedSize(true);
-
         myViewModel = ViewModelProviders.of(this).get(MyViewModel.class);
         myViewModel.datumList.observe(this, datumList -> {
             myAdapter.submitList(datumList);
@@ -56,7 +54,7 @@ public class GifsFragment extends Fragment {
         myAdapter = new MyAdapter(new OnUpdatePage() {
             @Override
             public void updatePage() {
-                Toast.makeText(getContext(), "loaded new page", Toast.LENGTH_SHORT).show();
+                makeToast("loaded new page");
                 myViewModel.updatePage(etGifType.getText().toString());
             }
         });
@@ -85,12 +83,16 @@ public class GifsFragment extends Fragment {
                     timer.schedule(new TimerTask() {
                         @Override
                         public void run() {
-                            myViewModel.getGifs(s.toString());
+                            myViewModel.replacePage(s.toString());
                         }
                     }, DELAY);
-                }
+                } else makeToast("too short request");
             }
         });
         return v;
+    }
+
+    public void makeToast(String txt) {
+        Toast.makeText(getContext(), txt, Toast.LENGTH_SHORT).show();
     }
 }
