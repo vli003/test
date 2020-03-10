@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,6 +37,17 @@ public class GifsFragment extends Fragment {
     public GifsFragment() {
         // Required empty public constructor
     }
+
+/*    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // alternative ViewModel initialization
+        myViewModel = ViewModelProviders.of(this).get(MyViewModel.class);
+        myViewModel.datumList.observe(this, datumList -> {
+            myAdapter.submitList(datumList);
+        });
+    }*/
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
