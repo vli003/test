@@ -6,4 +6,5 @@
     <string name="search_gifs">Search gifs</string>
     <string name="category">CATEGORY</string>
     <string name="gifs_loader">GifsLoader</string>
+    <string name="gif_loader_kt">GifLoaderKt</string>
 </resources>
