@@ -10,10 +10,12 @@ import androidx.recyclerview.widget.RecyclerView
 import app.android.gifloaderviewmodel.R
 import app.android.gifloaderviewmodel.model.Datum
 import com.bumptech.glide.Glide
+import kotlinx.android.synthetic.main.item_gif.view.*
 import java.util.*
 
 class MyAdapter(private val onUpdatePage: OnUpdatePage) : RecyclerView.Adapter<MyAdapter.ViewHolder>() {
     private var gifs: List<Datum>? = ArrayList()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent.context).inflate(R.layout.item_gif, parent, false)
         return ViewHolder(v)
@@ -44,20 +46,14 @@ class MyAdapter(private val onUpdatePage: OnUpdatePage) : RecyclerView.Adapter<M
         }
     }*/
     inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-        var textView: TextView
-        var imageView: ImageView
+        var textView: TextView = v.tv_item_title
+        var imageView: ImageView = v.iv_item
         fun bind(datum: Datum) {
             val tv = textView
             tv.text = datum.title
-            val fixedHeightDownsampled = datum.images!!.fixedHeightDownsampled
+            val fixedHeightDownsampled = datum.images?.fixedHeightDownsampled
             val iv = imageView
-            Glide.with(itemView.context).load(fixedHeightDownsampled!!.url).into(iv)
-        }
-
-        init {
-            textView = v.findViewById(R.id.tv_item_title)
-            imageView = v.findViewById(R.id.iv_item)
+            Glide.with(itemView.context).load(fixedHeightDownsampled?.url).into(iv)
         }
     }
-
 }

@@ -35,7 +35,8 @@ class GifsFragment : Fragment(R.layout.fragment_gifs) {
     }*/
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        rv.adapter
+
+//        rv.adapter
 
         myViewModel = ViewModelProviders.of(this).get(MyViewModel::class.java)
         myViewModel.datumList.observe(viewLifecycleOwner, Observer { datumList: List<Datum>? -> myAdapter?.submitList(datumList) })
@@ -45,8 +46,10 @@ class GifsFragment : Fragment(R.layout.fragment_gifs) {
                 myViewModel.updatePage(et_gif_type?.text?.toString())
             }
         })
+
         rv.adapter = myAdapter
         rv.layoutManager = LinearLayoutManager(context)
+
         et_gif_type.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {

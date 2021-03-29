@@ -31,9 +31,11 @@ class GifsRepository {
                 }
             });*/
 // Logs
-    val retrofitInstance: Retrofit?
+    val retrofitInstance: Retrofit
         get() {
-            if (retrofit == null) { // java.lang.UnsupportedOperationException
+            if (retrofit == null) {
+
+                // java.lang.UnsupportedOperationException
 /*            OkHttpClient client = new OkHttpClient();
             client.interceptors().add(new Interceptor() {
                 @NotNull
@@ -63,7 +65,7 @@ class GifsRepository {
                         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                         .build()
             }
-            return retrofit
+            return retrofit!!
         }
 
     fun getGifs(gifType: String?, page: Int): Single<MyResponse?>? {
@@ -71,6 +73,6 @@ class GifsRepository {
     }
 
     init {
-        giphyApi = retrofitInstance!!.create(GiphyApi::class.java)
+        giphyApi = retrofitInstance.create(GiphyApi::class.java)
     }
 }

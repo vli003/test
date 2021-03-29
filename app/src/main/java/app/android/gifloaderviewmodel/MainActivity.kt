@@ -6,7 +6,8 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import app.android.gifloaderviewmodel.controller.GifsFragment
 
-class MainActivity : AppCompatActivity() {
+class /**/MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -14,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN)
         setContentView(R.layout.activity_main)
-        supportActionBar!!.hide()
+        supportActionBar?.hide()
 
         if (savedInstanceState == null) {
             supportFragmentManager
